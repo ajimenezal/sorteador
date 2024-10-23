@@ -15,6 +15,11 @@
       border-radius: 8px;
       background-color: #f8f9fa;
       border: 2px solid #007bff;
+      transition: background-color 0.5s ease, color 0.5s ease;
+    }
+    .number-box.active {
+      background-color: #007bff;
+      color: white;
     }
   </style>
 </head>
@@ -48,50 +53,97 @@
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
 
+  <!-- Canvas-Confetti Script -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
   <script>
-    let modoAzar = true; // Bandera que determina si es al azar o se usa el archivo
+    let modoAzar = true; // Variable inicial que se actualizará con los datos del JSON
+    let ganadoresPredefinidos = [0, 0, 0, 0]; // Array que se actualizará con los datos del JSON
+    let intervalos = []; // Guardar los intervalos para parar el efecto
 
     // Función para generar un número aleatorio entre 1 y 100
     function generarNumeroAleatorio() {
       return Math.floor(Math.random() * 100) + 1;
     }
 
-    // Función para mostrar los números aleatorios o cargados
-    function sortearNumeros(ganadores) {
-      if (modoAzar) {
-        document.getElementById('num1').innerText = generarNumeroAleatorio();
-        document.getElementById('num2').innerText = generarNumeroAleatorio();
-        document.getElementById('num3').innerText = generarNumeroAleatorio();
-        document.getElementById('num4').innerText = generarNumeroAleatorio();
-      } else {
-        document.getElementById('num1').innerText = ganadores[0];
-        document.getElementById('num2').innerText = ganadores[1];
-        document.getElementById('num3').innerText = ganadores[2];
-        document.getElementById('num4').innerText = ganadores[3];
-      }
+    // Función que simula la ruleta de números
+    function moverNumeros() {
+      // Array de los elementos de cada caja
+      const cajas = [document.getElementById('num1'), document.getElementById('num2'), document.getElementById('num3'), document.getElementById('num4')];
+
+      // Reiniciar intervalos si ya estaban corriendo
+      intervalos.forEach(interval => clearInterval(interval));
+      intervalos = [];
+
+      // Mover cada número cada 100ms
+      cajas.forEach((caja, index) => {
+        intervalos[index] = setInterval(() => {
+          caja.innerText = generarNumeroAleatorio();
+        }, 100);
+      });
+
+      // Detener uno por uno después de 10, 11, 12, 13 segundos
+      cajas.forEach((caja, index) => {
+        setTimeout(() => {
+          clearInterval(intervalos[index]); // Detener el movimiento de la caja
+          caja.innerText = modoAzar ? generarNumeroAleatorio() : ganadoresPredefinidos[index]; // Mostrar el número final
+          caja.classList.add('active'); // Añadir efecto visual cuando se detiene
+
+          // Si es el último número, ejecutar la celebración
+          if (index === cajas.length - 1) {
+            lanzarConfeti(); // Llamamos a la función que lanza el confeti
+          }
+        }, 10000 + index * 1000); // Se detiene en 10, 11, 12 y 13 segundos
+      });
     }
 
-    // Función para cargar los números predefinidos desde el archivo JSON
-    function cargarNumerosGanadores() {
-      fetch('numeros_ganadores.json')
+    // Evento del botón para iniciar el sorteo
+    document.getElementById('sortearBtn').addEventListener('click', function() {
+      // Resetear estilos
+      document.querySelectorAll('.number-box').forEach(box => box.classList.remove('active'));
+      moverNumeros();
+    });
+
+    // Función para lanzar confeti al finalizar el sorteo
+    function lanzarConfeti() {
+      var duration = 3 * 1000; // Duración del confeti (3 segundos)
+      var animationEnd = Date.now() + duration;
+      var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+
+      function randomInRange(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      var interval = setInterval(function() {
+        var timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+
+        var particleCount = 50 * (timeLeft / duration);
+
+        // Crear el efecto de confeti
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+      }, 250);
+    }
+
+    // Función para cargar la configuración desde el archivo JSON
+    function cargarConfiguracion() {
+      fetch('configuracion_sorteo.json')
         .then(response => response.json())
         .then(data => {
-          const ganadores = data.ganadores;
-          sortearNumeros(ganadores);
+          // Asignar los datos obtenidos desde el JSON
+          modoAzar = data.modoAzar;
+          ganadoresPredefinidos = data.ganadoresPredefinidos;
+          console.log("Configuración cargada:", data);
         })
-        .catch(error => {
-          console.error("Error al cargar los números ganadores:", error);
-        });
+        .catch(error => console.error('Error al cargar la configuración:', error));
     }
 
-    // Añadir evento al botón para sortear números
-    document.getElementById('sortearBtn').addEventListener('click', function() {
-      if (modoAzar) {
-        sortearNumeros(); // Si está en modo azar, sortea números aleatorios
-      } else {
-        cargarNumerosGanadores(); // Si no, carga los números predefinidos del archivo
-      }
-    });
+    // Llamar a la función para cargar el JSON al cargar la página
+    window.onload = cargarConfiguracion;
 
   </script>
 
