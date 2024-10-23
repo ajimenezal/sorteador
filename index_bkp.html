@@ -21,29 +21,12 @@
       background-color: #007bff;
       color: white;
     }
-    .logo-container {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .logo-container img {
-      max-width: 100%;
-      height: auto;
-      max-height: 300px; /* Ajusta la altura máxima del logo */
-      border-radius: 50%; /* Hace la imagen completamente circular si es cuadrada */
-      object-fit: cover; /* Para que la imagen no se deforme */
-    }
   </style>
 </head>
 <body class="bg-light">
 
   <div class="container mt-5">
-    <!-- Contenedor del logo -->
-    <div class="logo-container">
-      <img src="Leonardo_Phoenix_A_modern_sleek_logo_design_for_a_new_startup_0.jpg" alt="Logo de la empresa">
-    </div>
-
-    <!--<h1 class="text-center mb-4">Sorteador de Números</h1>-->
-    
+    <h1 class="text-center mb-4">Sorteador de Números</h1>
     <div class="row justify-content-center">
       <!-- Cajas para mostrar los números sorteados -->
       <div class="col-2">
@@ -73,7 +56,6 @@
   <!-- Canvas-Confetti Script -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-  <!-- Tu script existente del sorteador va aquí -->
   <script>
     let modoAzar = true; // Variable inicial que se actualizará con los datos del JSON
     let ganadoresPredefinidos = [0, 0, 0, 0]; // Array que se actualizará con los datos del JSON
@@ -164,5 +146,6 @@
     window.onload = cargarConfiguracion;
 
   </script>
+
 </body>
 </html>
