@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Máquina Tragamonedas de Números</title>
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
@@ -25,7 +24,7 @@
       position: relative;
       width: 600px;
       height: 400px;
-      background-image: url('jackpot_ia_borrado.jpg'); /* Cambia 'jackpot_ia.png' a la ruta correcta de la imagen */
+      background-image: url('jackpot_ia.png'); /* Cambia la ruta si es necesario */
       background-size: contain;
       background-position: center;
       background-repeat: no-repeat;
@@ -33,16 +32,16 @@
       justify-content: center;
       align-items: center;
       margin-top: 20px;
-      perspective: 1000px; /* Añadimos perspectiva para el efecto 3D */
+      perspective: 1000px;
     }
     .slots {
       position: absolute;
-      top: 30%; /* Ajusta esta posición para alinear con el área de los slots */
+      top: 30%;
       display: flex;
       gap: 30px;
       justify-content: center;
       width: 100%;
-      transform: rotateY(-10deg); /* Curvatura leve en el eje Y */
+      transform: rotateY(-10deg);
       transform-style: preserve-3d;
       transition: transform 0.5s ease-in-out;
     }
@@ -56,7 +55,7 @@
       border-radius: 8px;
       transition: background-color 0.5s ease, color 0.5s ease;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-      transform: rotateY(10deg); /* Aplicamos una pequeña rotación para los slots individuales */
+      transform: rotateY(10deg);
     }
     .start-btn {
       margin-top: 20px;
@@ -90,8 +89,8 @@
       document.getElementById("num4")
     ];
     let intervalIds = [];
-    let isRandom = true; // Valor por defecto
-    let fixedNumbers = [0, 0, 0, 0]; // Valores predeterminados en caso de error al cargar el JSON
+    let isRandom = true;
+    let fixedNumbers = [0, 0, 0, 0];
 
     // Cargar configuración desde config.json
     async function loadConfig() {
@@ -105,24 +104,29 @@
       }
     }
 
-    // Función para obtener el número basado en configuración
+    // Función para obtener el número de cada slot
     function getNumber(index) {
-      if (isRandom) {
-        return Math.floor(Math.random() * 10); // Número aleatorio entre 0 y 9
-      } else {
-        return fixedNumbers[index] || 0; // Devuelve el número fijo o 0 si no existe
-      }
+      return isRandom ? Math.floor(Math.random() * 10) : fixedNumbers[index];
     }
 
     // Función para simular el giro de un solo slot
     function spinSlot(slot, index, delay) {
       return new Promise(resolve => {
+        let spins = 0; // Contador de giros temporales
         const intervalId = setInterval(() => {
-          slot.textContent = getNumber(index);
+          // Para el efecto de giro, se generan números aleatorios temporalmente
+          slot.textContent = Math.floor(Math.random() * 10);
+          spins++;
+
+          // Después de varios giros temporales, muestra el número final (fijo o aleatorio)
+          if (spins >= 20) { // Ajusta este valor para controlar la cantidad de "giros"
+            slot.textContent = getNumber(index);
+          }
         }, 100);
 
         intervalIds.push(intervalId);
 
+        // Detener el giro del slot después de cierto tiempo
         setTimeout(() => {
           clearInterval(intervalId);
           resolve();
@@ -130,7 +134,7 @@
       });
     }
 
-    // Función para ejecutar el giro secuencial y mostrar la celebración
+    // Función para iniciar el giro secuencial y el efecto de celebración
     async function startSpin() {
       startBtn.disabled = true;
       intervalIds.forEach(id => clearInterval(id));
@@ -152,7 +156,7 @@
     startBtn.addEventListener("click", startSpin);
 
     document.addEventListener("DOMContentLoaded", function() {
-      loadConfig(); // Cargar configuración al iniciar
+      loadConfig();
       const audio = new Audio("tu-musica.mp3");
       audio.play();
     });
